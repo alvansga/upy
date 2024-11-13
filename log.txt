@@ -1,0 +1,27 @@
+
+python -m venv env_upy
+source env_upy/bin/activate
+
+pip install setuptools
+
+pip install python-esptool adafruit-ampy
+
+
+python -m esptool --chip esp32 --port /dev/ttyUSB0 erase_flash
+
+python -m esptool --chip esp32 --port /dev/ttyUSB0 write_flash -z 0x1000 ESP32_GENERIC-20241025-v1.24.0.bin
+
+ampy -p /dev/ttyUSB0 ls
+
+ampy -p /dev/ttyUSB0 put blink.py
+
+
+sudo apt install putty
+putty -load [session-name]
+
+
+import os
+os.listdir()
+
+exec( open("blink.py").read() )
+
