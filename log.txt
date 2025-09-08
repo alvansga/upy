@@ -1,0 +1,8 @@
+burn firmware esp32 with esptool
+
+upload file with upycraft or thonny
+
+upload file with shell: ampy --port COM3 put file.py
+
+rename main.py to autostart script
+
