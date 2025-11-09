@@ -23,7 +23,6 @@ def updateScreen():
                 
     oled.invert(True)
     oled.show()
-    print("screen updated")
   except:
     print("image corrupt")
 updateScreen()
