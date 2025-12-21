@@ -3,28 +3,35 @@ import ssd1306
 from machine import Pin, I2C
 
 # OLED setup
-i2c = I2C(0, scl=Pin(9), sda=Pin(8)) # esp32-c3
+i2c = I2C(0, scl=Pin(6), sda=Pin(7)) # esp32-c3
 oled = ssd1306.SSD1306_I2C(128, 64, i2c)
 
-def updateScreen():
-  # Load image buffer
-  with open("oled_image.bin", "rb") as f:
-      buffer = f.read()
+def goToLightSleep():
+    import machine
+    print("Go to light sleep...")
+    machine.lightsleep()  # 1 minute
 
-  # Show image
-  #oled.blit_framebuffer(buffer, 0, 0)  # if your SSD1306 lib supports blit
-  try:
-    for page in range(8):  # 8 pages = 64 pixels / 8
-        for x in range(128):
-            byte = buffer[page * 128 + x]
-            for bit in range(8):
-                color = (byte >> bit) & 1
-                oled.pixel(x, page * 8 + bit, color)
-                
-    oled.invert(True)
-    oled.show()
-  except:
-    print("image corrupt")
+def updateScreen():
+    filename = "oled_image.bin"
+
+    try:
+        with open(filename, "rb") as f:
+            for page in range(8):  # 8 pages
+                for x in range(128):
+                    byte = f.read(1)
+                    if not byte:
+                        print("Image too small")
+                        return
+                    b = byte[0]
+                    for bit in range(8):
+                        color = (b >> bit) & 1
+                        oled.pixel(x, page * 8 + bit, color)
+
+        oled.invert(True)
+        oled.show()
+
+    except Exception as e:
+        print("Error loading image:", e)
 updateScreen()
 
 import network
@@ -52,11 +59,15 @@ PORT = 5000
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind((ap.ifconfig()[0], PORT))
 server.listen(1)
-server.settimeout(180)  # 3 minutes = 180 seconds
-print(f"TCP Server listening on {ap.ifconfig()[0]}:{PORT}. You have 3 minutes to connect!")
+server.settimeout(120)  # 3 minutes = 180 seconds
+print(f"TCP Server listening on {ap.ifconfig()[0]}:{PORT}. You have 2 minutes to connect!")
 
-conn, addr = server.accept()
-print("Client connected from:", addr)
+try:
+    conn, addr = server.accept()
+    print("Client connected from:", addr)
+except Exception as e:
+    print("no client connected:", str(e))
+    goToLightSleep()
 
 try:
     while True:
@@ -65,38 +76,26 @@ try:
             print("Client disconnected.")
             break
         
-        try:
-            msg = data.decode().strip()
-            print("Received:", msg)
-            
-            if (msg == "hi"):
-                print("send back: hi")
-                conn.send(b"hi! :)")
-            else:
-                pass
-            # Send a reply
-            #conn.send(b"ACK from ESP32 AP server\n")
-        except UnicodeError:
-            # 🧠 Binary mode
-            filename = "oled_image.bin"
-            print("Receiving binary file...")
-            with open(filename, "wb") as f:
-                total_bytes = 0
+        # 🧠 Binary mode
+        filename = "oled_image.bin"
+        print("Receiving binary file...")
+        with open(filename, "wb") as f:
+            total_bytes = 0
 
-                # write the first data chunk too!
-                f.write(data)
-                total_bytes += len(data)
+            # write the first data chunk too!
+            f.write(data)
+            total_bytes += len(data)
 
-                # continue reading remaining bytes
-                while True:
-                    chunk = conn.recv(1024)
-                    if not chunk:
-                        break
-                    f.write(chunk)
-                    total_bytes += len(chunk)
+            # continue reading remaining bytes
+            while True:
+                chunk = conn.recv(1024)
+                if not chunk:
+                    break
+                f.write(chunk)
+                total_bytes += len(chunk)
 
-            print(f"Received {total_bytes} bytes total.")
-            conn.send(b"File received successfully!\n")
+        print(f"Received {total_bytes} bytes total.")
+        conn.send(b"File received successfully!\n")
 
 except Exception as e:
     print("Error:", e)
@@ -107,10 +106,8 @@ finally:
     print("Server closed.")
     
 updateScreen()
+goToLightSleep()
 
-import machine
-print("Go to light sleep...")
-machine.lightsleep()  # 1 minute
 
 
 
