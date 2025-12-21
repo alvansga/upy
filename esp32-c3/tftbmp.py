@@ -1,5 +1,6 @@
 from ST7735 import TFT,TFTColor
 from machine import SPI,Pin
+
 spi = SPI(
     1,
     baudrate=20_000_000,

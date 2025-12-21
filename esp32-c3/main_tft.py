@@ -51,7 +51,7 @@ except Exception as e:
     #goToLightSleep()
 
 try:
-    filename = "image_24.bmp"
+    filename = "image_24bit.bmp"
     total = 0
 
     with open(filename, "wb") as f:
@@ -70,11 +70,13 @@ except Exception as e:
 finally:
     conn.close()
     server.close()
+    ap.active(False)
     print("Server closed.")
     
 # oled_display.updateScreen()
 tft_display.updateScreen()
 #goToLightSleep()
+
 
 
 

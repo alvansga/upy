@@ -1,36 +1,19 @@
-
-import ssd1306
-from machine import Pin, I2C
-
 # OLED setup
-i2c = I2C(0, scl=Pin(9), sda=Pin(8)) # esp32-c3
-oled = ssd1306.SSD1306_I2C(128, 64, i2c)
+from oled_display import OledDisplay
+from tft_display import TftDisplay
+
+
+# oled_display = OledDisplay()
+# oled_display.updateScreen("oled_image.bin")
+
+tft_display = TftDisplay()
+tft_display.updateScreen("image_24bit.bmp")
+
 
 def goToLightSleep():
     import machine
     print("Go to light sleep...")
     machine.lightsleep()  # 1 minute
-
-def updateScreen():
-  # Load image buffer
-  with open("oled_image.bin", "rb") as f:
-      buffer = f.read()
-
-  # Show image
-  #oled.blit_framebuffer(buffer, 0, 0)  # if your SSD1306 lib supports blit
-  try:
-    for page in range(8):  # 8 pages = 64 pixels / 8
-        for x in range(128):
-            byte = buffer[page * 128 + x]
-            for bit in range(8):
-                color = (byte >> bit) & 1
-                oled.pixel(x, page * 8 + bit, color)
-                
-    oled.invert(True)
-    oled.show()
-  except:
-    print("image corrupt")
-updateScreen()
 
 import network
 import socket
@@ -65,47 +48,21 @@ try:
     print("Client connected from:", addr)
 except Exception as e:
     print("no client connected:", str(e))
-    goToLightSleep()
+    #goToLightSleep()
 
 try:
-    while True:
-        data = conn.recv(1024)
-        if not data:
-            print("Client disconnected.")
-            break
-        
-        try:
-            msg = data.decode().strip()
-            print("Received:", msg)
-            
-            if (msg == "hi"):
-                print("send back: hi")
-                conn.send(b"hi! :)")
-            else:
-                pass
-            # Send a reply
-            #conn.send(b"ACK from ESP32 AP server\n")
-        except UnicodeError:
-            # 🧠 Binary mode
-            filename = "oled_image.bin"
-            print("Receiving binary file...")
-            with open(filename, "wb") as f:
-                total_bytes = 0
+    filename = "image_24bit.bmp"
+    total = 0
 
-                # write the first data chunk too!
-                f.write(data)
-                total_bytes += len(data)
+    with open(filename, "wb") as f:
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                break
+            f.write(data)
+            total += len(data)
 
-                # continue reading remaining bytes
-                while True:
-                    chunk = conn.recv(1024)
-                    if not chunk:
-                        break
-                    f.write(chunk)
-                    total_bytes += len(chunk)
-
-            print(f"Received {total_bytes} bytes total.")
-            conn.send(b"File received successfully!\n")
+    print("Saved", total, "bytes")
 
 except Exception as e:
     print("Error:", e)
@@ -113,10 +70,16 @@ except Exception as e:
 finally:
     conn.close()
     server.close()
+    ap.active(False)
     print("Server closed.")
     
-updateScreen()
-goToLightSleep()
+# oled_display.updateScreen()
+tft_display.updateScreen()
+#goToLightSleep()
+
+
+
+
 
 
 

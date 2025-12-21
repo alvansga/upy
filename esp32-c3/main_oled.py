@@ -3,11 +3,11 @@ from oled_display import OledDisplay
 from tft_display import TftDisplay
 
 
-# oled_display = OledDisplay()
-# oled_display.updateScreen("oled_image.bin")
+oled_display = OledDisplay()
+oled_display.updateScreen("oled_image.bin")
 
-tft_display = TftDisplay()
-tft_display.updateScreen("image_24bit.bmp")
+# tft_display = TftDisplay()
+# tft_display.updateScreen("image_24bit.bmp")
 
 
 def goToLightSleep():
@@ -48,10 +48,10 @@ try:
     print("Client connected from:", addr)
 except Exception as e:
     print("no client connected:", str(e))
-    #goToLightSleep()
+    goToLightSleep()
 
 try:
-    filename = "image_24.bmp"
+    filename = "oled_image.bin"
     total = 0
 
     with open(filename, "wb") as f:
@@ -70,11 +70,13 @@ except Exception as e:
 finally:
     conn.close()
     server.close()
+    ap.active(False)
     print("Server closed.")
     
-# oled_display.updateScreen()
-tft_display.updateScreen()
-#goToLightSleep()
+oled_display.updateScreen()
+# tft_display.updateScreen()
+goToLightSleep()
+
 
 
 

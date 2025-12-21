@@ -12,6 +12,8 @@ class OledDisplay:
             self.oled = ssd1306.SSD1306_I2C(width, height, self.i2c)
         except Exception as e:
             print("Error initializing OLED:", e)
+            self.oled = None
+            self.i2c = None
 
     def updateScreen(self, filename="oled_image.bin"):
         try:
@@ -32,3 +34,5 @@ class OledDisplay:
 
         except Exception as e:
             print("Error loading image:", e)
+            
+        print("OLED updateScreen done.")
