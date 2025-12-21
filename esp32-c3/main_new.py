@@ -70,44 +70,31 @@ except Exception as e:
     goToLightSleep()
 
 try:
+    buffer = bytearray()
+    print("Receiving data into buffer...")
+
     while True:
         data = conn.recv(1024)
         if not data:
             print("Client disconnected.")
             break
-        
-        try:
-            msg = data.decode().strip()
-            print("Received:", msg)
-            
-            if (msg == "hi"):
-                print("send back: hi")
-                conn.send(b"hi! :)")
-            else:
-                pass
-            # Send a reply
-            #conn.send(b"ACK from ESP32 AP server\n")
-        except UnicodeError:
-            # 🧠 Binary mode
-            filename = "oled_image.bin"
-            print("Receiving binary file...")
-            with open(filename, "wb") as f:
-                total_bytes = 0
 
-                # write the first data chunk too!
-                f.write(data)
-                total_bytes += len(data)
+        buffer.extend(data)
 
-                # continue reading remaining bytes
-                while True:
-                    chunk = conn.recv(1024)
-                    if not chunk:
-                        break
-                    f.write(chunk)
-                    total_bytes += len(chunk)
+    total_bytes = len(buffer)
+    print("Total received:", total_bytes, "bytes")
 
-            print(f"Received {total_bytes} bytes total.")
-            conn.send(b"File received successfully!\n")
+    # ===== keputusan berdasarkan ukuran =====
+    if total_bytes <= 1024:
+        filename = "oled_image.bin"
+    else:
+        filename = "image_24.bmp"
+
+    with open(filename, "wb") as f:
+        f.write(buffer)
+
+    print("Saved as:", filename)
+    conn.send(b"File received and saved\n")
 
 except Exception as e:
     print("Error:", e)

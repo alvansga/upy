@@ -16,8 +16,8 @@ spi = SPI(
 tft = TFT(
     spi,
     4,
-    5,
-    2
+    2,
+    5
 )
 
 tft.initr()

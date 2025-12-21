@@ -23,7 +23,7 @@ tft.initr()
 tft.rgb(True)
 tft.fill(TFT.BLACK)
 
-f=open('shella.bmp', 'rb')
+f=open('image_24bit.bmp', 'rb')
 if f.read(2) == b'BM':  #header
     dummy = f.read(8) #file size(4), creator bytes(4)
     offset = int.from_bytes(f.read(4), 'little')
