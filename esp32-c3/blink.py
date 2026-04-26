@@ -4,7 +4,12 @@ import time
 led = Pin(8, Pin.OUT)  # Try 8 first
 
 while True:
-    led.value(1)  # LED ON
-    time.sleep(0.5)
-    led.value(0)  # LED OFF
-    time.sleep(0.5)
+    led.off()
+    time.sleep(0.1)
+    led.on()
+    time.sleep(0.1)
+
+    led.off()
+    time.sleep(0.1)
+    led.on()
+    time.sleep(0.7)

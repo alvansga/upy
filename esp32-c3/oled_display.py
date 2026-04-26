@@ -1,11 +1,13 @@
 # [z] class oled_display.py
-
 import ssd1306
 from machine import Pin, I2C
+import time
+
+FRAME_SIZE = 128 * 64 // 8  # 1024 byte
 
 class OledDisplay:
 
-    def __init__(self, scl_pin=6, sda_pin=7, width=128, height=64):
+    def __init__(self, scl_pin=9, sda_pin=8, width=128, height=64):
         # OLED setup
         try:
             self.i2c = I2C(0, scl=Pin(scl_pin), sda=Pin(sda_pin)) # esp32-c3
@@ -36,3 +38,20 @@ class OledDisplay:
             print("Error loading image:", e)
             
         print("OLED updateScreen done.")
+    
+    def playAnimation(self, filename="anim.bin"):
+        try:
+            with open(filename, "rb") as f:
+                while True:
+                    frame = f.read(FRAME_SIZE)
+                    if not frame:
+                        break
+
+                    self.oled.buffer[:] = frame
+                    self.oled.show()
+                    time.sleep(0.1)
+
+        except Exception as e:
+            print("Error loading image:", e)
+
+        print("OLED playAnimation done.")

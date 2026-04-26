@@ -1,6 +1,6 @@
 # OLED setup
 from oled_display import OledDisplay
-from tft_display import TftDisplay
+#from tft_display import TftDisplay
 
 
 oled_display = OledDisplay()
